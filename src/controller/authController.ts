@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { clerkClient, getAuth } from "@clerk/express";
-import { syncUserService } from "../../services/auth.ts";
+import { syncUserService } from "../services/auth.ts";
 
 /**
  * @route   POST /api/auth/sync
@@ -28,7 +28,7 @@ export const syncUserController = async (
       const user = await clerkClient.users.getUser(clerkUserId);
       referralCode = user.unsafeMetadata.referralCode as string;
       email = user.emailAddresses[0].emailAddress;
-      name = user.firstName + " " + user.lastName;
+      name = user.firstName + " " + (user.lastName ? user.lastName : "");
     }
 
     const result = await syncUserService({

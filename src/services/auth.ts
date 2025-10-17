@@ -21,6 +21,7 @@ interface UserResponse {
   clerkUserId: string;
   referralCode: string;
   credits: number;
+  name: string;
 }
 
 export const syncUserService = async (
@@ -33,6 +34,7 @@ export const syncUserService = async (
   if (user) {
     return {
       id: user._id,
+      name: user.name,
       clerkUserId: user.clerkUserId,
       referralCode: user.referralCode,
       credits: user.credits,
@@ -48,6 +50,7 @@ export const syncUserService = async (
     try {
       newUser = await UserModel.create({
         clerkUserId,
+        name: input.name,
         referralCode: attemptCode,
         credits: 0,
         totalCreditsEarned: 0,
@@ -96,6 +99,7 @@ export const syncUserService = async (
 
   return {
     id: newUser._id.toString(),
+    name: newUser.name,
     clerkUserId: newUser.clerkUserId,
     referralCode: newUser.referralCode,
     credits: newUser.credits,

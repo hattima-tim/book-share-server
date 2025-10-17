@@ -7,6 +7,7 @@ export interface IUser extends mongoose.Document {
   credits: number;
   totalCreditsEarned: number;
   totalReferredUsers: number;
+  name: string;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
@@ -24,6 +25,11 @@ const UserSchema: Schema<IUser> = new Schema(
       uppercase: true,
       trim: true,
       index: true,
+    },
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+      trim: true,
     },
     credits: {
       type: Number,

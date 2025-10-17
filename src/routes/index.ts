@@ -4,7 +4,7 @@ import authRouter from "./authRoute.ts";
 
 const router = Router();
 
-router.use("/users", userRouter);
+router.use("/", userRouter);
 router.use("/auth", authRouter);
 
 export default router;
