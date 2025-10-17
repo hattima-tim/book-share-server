@@ -2,19 +2,23 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
-import apiRouter from "./routes/index.js";
-import { requestLogger } from "./middleware/logger.js";
-import { errorHandler } from "./middleware/errorHandler.js";
+import { clerkMiddleware } from "@clerk/express";
+import apiRouter from "./routes/index.ts";
+import { errorHandler } from "./middleware/errorHandler.ts";
+import { requestLogger } from "./middleware/logger.ts";
+import connectDatabase from "./config/database.ts";
 
 const app = express();
+await connectDatabase();
 
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN?.split(",") || ["http://localhost:3000"],
+    origin: process.env.CORS_ORIGIN?.split(",") || ["http://localhost:3001"],
     credentials: true,
   })
 );
+app.use(clerkMiddleware());
 
 // Parsing middleware
 app.use(express.json({ limit: "10mb" }));
@@ -50,7 +54,7 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Start server
-const server = app.listen(process.env.port, () => {
+const server = app.listen(process.env.PORT, () => {
   console.log(
     `🚀 Server running on port ${process.env.PORT} in ${process.env.NODE_ENV} mode`
   );

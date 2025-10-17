@@ -1,0 +1,103 @@
+import { type IUser, UserModel } from "../models/user.ts";
+import Referral from "../models/referral.ts";
+import { generateReferralCode } from "../utils/generateReferralCode.ts";
+
+/**
+ * Sync or create user from Clerk authentication
+ * This is called when a user signs up or signs in via Clerk
+ * @param input - User data from Clerk
+ * @returns User data
+ */
+
+interface SyncUserInput {
+  clerkUserId: string;
+  email: string;
+  name: string;
+  referralCode?: string;
+}
+
+interface UserResponse {
+  id: string;
+  clerkUserId: string;
+  referralCode: string;
+  credits: number;
+}
+
+export const syncUserService = async (
+  input: SyncUserInput
+): Promise<UserResponse> => {
+  const { clerkUserId, referralCode } = input;
+
+  let user = await UserModel.findOne<IUser>({ clerkUserId });
+
+  if (user) {
+    return {
+      id: user._id,
+      clerkUserId: user.clerkUserId,
+      referralCode: user.referralCode,
+      credits: user.credits,
+    };
+  }
+
+  let isUnique = false;
+  let newUser;
+  const maxAttempts = 10;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const attemptCode = generateReferralCode();
+    try {
+      newUser = await UserModel.create({
+        clerkUserId,
+        referralCode: attemptCode,
+        credits: 0,
+        totalCreditsEarned: 0,
+        totalReferredUsers: 0,
+      });
+
+      isUnique = true;
+      break;
+    } catch (error: any) {
+      if (error.code === 11000) {
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  if (!isUnique) {
+    throw new Error("Failed to generate unique referral code");
+  }
+
+  if (!newUser) {
+    throw new Error("Failed to create user");
+  }
+
+  if (referralCode) {
+    const referrer = await UserModel.findOne({
+      referralCode: referralCode.toUpperCase(),
+    });
+
+    if (referrer) {
+      if (referrer.clerkUserId !== newUser.clerkUserId) {
+        await Referral.create({
+          referrerId: referrer._id,
+          referredUserId: newUser._id,
+          status: "pending",
+          creditsAwarded: false,
+        });
+
+        await UserModel.findByIdAndUpdate(referrer._id, {
+          $inc: { totalReferredUsers: 1 },
+        });
+      }
+    }
+  }
+
+  return {
+    id: newUser._id.toString(),
+    clerkUserId: newUser.clerkUserId,
+    referralCode: newUser.referralCode,
+    credits: newUser.credits,
+  };
+};
