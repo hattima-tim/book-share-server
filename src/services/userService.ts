@@ -1,4 +1,4 @@
-import { UserModel } from "../models/user.ts";
+import { type IUser, UserModel } from "../models/user.ts";
 import Referral from "../models/referral.ts";
 import { type DashboardResponse } from "../types/index.ts";
 
@@ -20,38 +20,32 @@ export const getDashboardData = async (
     throw new Error("User not found");
   }
 
-  const referralStats = await Referral.aggregate([
-    {
-      $match: { referrerId: user._id },
-    },
-    {
-      $group: {
-        _id: null,
-        totalReferred: { $sum: 1 },
-        convertedUsers: {
-          $sum: {
-            $cond: [{ $eq: ["$status", "converted"] }, 1, 0],
-          },
-        },
-      },
-    },
-  ]);
+  const referrals = await Referral.find({ referrerId: user._id })
+    .populate("referredUserId")
+    .lean();
 
-  const stats =
-    referralStats.length > 0
-      ? referralStats[0]
-      : { totalReferred: 0, convertedUsers: 0 };
+  const referredUsers = referrals.map((r) => {
+    const userObj = r.referredUserId;
+
+    return { ...userObj, status: (r as any).status } as unknown as IUser;
+  });
+
+  const stats = {
+    totalReferred: referrals.length,
+    convertedUsers: referrals.filter((r) => r.status === "converted").length,
+    referredUsers,
+  };
 
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
   const referralLink = `${frontendUrl}/register?r=${user.referralCode}`;
 
   return {
     name: user.name,
-    totalReferredUsers: stats.totalReferred,
     convertedUsers: stats.convertedUsers,
     totalCreditsEarned: user.totalCreditsEarned,
     currentBalance: user.credits,
     referralLink,
     referralCode: user.referralCode,
+    referredUsers: stats.referredUsers,
   };
 };
