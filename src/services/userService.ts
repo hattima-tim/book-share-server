@@ -1,4 +1,4 @@
-import { type IUser, UserModel } from "../models/user.ts";
+import { type IUser, UserModel } from "../models/userSchema.ts";
 import Referral from "../models/referral.ts";
 import { type DashboardResponse } from "../types/index.ts";
 

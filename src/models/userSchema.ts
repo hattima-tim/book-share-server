@@ -8,6 +8,7 @@ export interface IUser extends mongoose.Document {
   totalCreditsEarned: number;
   totalReferredUsers: number;
   name: string;
+  referredBy: string | null;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
@@ -45,6 +46,11 @@ const UserSchema: Schema<IUser> = new Schema(
       type: Number,
       default: 0,
       min: 0,
+    },
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
     },
   },
   {

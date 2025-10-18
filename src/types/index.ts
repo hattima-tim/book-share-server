@@ -1,4 +1,4 @@
-import { type IUser } from "../models/user.ts";
+import { type IUser } from "../models/userSchema.ts";
 
 export interface DashboardResponse {
   convertedUsers: number;

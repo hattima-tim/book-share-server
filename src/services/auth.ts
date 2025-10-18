@@ -1,4 +1,4 @@
-import { type IUser, UserModel } from "../models/user.ts";
+import { type IUser, UserModel } from "../models/userSchema.ts";
 import Referral from "../models/referral.ts";
 import { generateReferralCode } from "../utils/generateReferralCode.ts";
 
@@ -44,10 +44,15 @@ export const syncUserService = async (
   let isUnique = false;
   let newUser;
   const maxAttempts = 10;
-
+  let referrer;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const attemptCode = generateReferralCode();
     try {
+      if (referralCode) {
+        referrer = await UserModel.findOne({
+          referralCode: referralCode.toUpperCase(),
+        });
+      }
       newUser = await UserModel.create({
         clerkUserId,
         name: input.name,
@@ -55,6 +60,7 @@ export const syncUserService = async (
         credits: 0,
         totalCreditsEarned: 0,
         totalReferredUsers: 0,
+        ...(referrer ? { referredBy: referrer._id } : {}),
       });
 
       isUnique = true;
@@ -76,25 +82,18 @@ export const syncUserService = async (
     throw new Error("Failed to create user");
   }
 
-  if (referralCode) {
-    const referrer = await UserModel.findOne({
-      referralCode: referralCode.toUpperCase(),
+  if (referrer && referrer.clerkUserId !== newUser.clerkUserId) {
+    await Referral.create({
+      referrerId: referrer._id,
+      referredUserId: newUser._id,
+      status: "pending",
+      creditsAwarded: false,
     });
 
-    if (referrer) {
-      if (referrer.clerkUserId !== newUser.clerkUserId) {
-        await Referral.create({
-          referrerId: referrer._id,
-          referredUserId: newUser._id,
-          status: "pending",
-          creditsAwarded: false,
-        });
-
-        await UserModel.findByIdAndUpdate(referrer._id, {
-          $inc: { totalReferredUsers: 1 },
-        });
-      }
-    }
+    await UserModel.findByIdAndUpdate(referrer._id, {
+      referredBy: newUser._id,
+      $inc: { totalReferredUsers: 1 },
+    });
   }
 
   return {
