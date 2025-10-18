@@ -7,5 +7,6 @@ export interface DashboardResponse {
   referralLink: string;
   referralCode: string;
   name: string;
+  referredBy: string | null;
   referredUsers: IUser[] | null;
 }

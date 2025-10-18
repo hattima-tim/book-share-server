@@ -1,5 +1,5 @@
 import { type IUser, UserModel } from "../models/userSchema.ts";
-import Referral from "../models/referral.ts";
+import Referral from "../models/referralSchema.ts";
 import { type DashboardResponse } from "../types/index.ts";
 
 /**
@@ -13,7 +13,7 @@ export const getDashboardData = async (
   clerkUserId: string
 ): Promise<DashboardResponse> => {
   const user = await UserModel.findOne({ clerkUserId }).select(
-    "_id credits totalCreditsEarned referralCode name"
+    "_id credits totalCreditsEarned referralCode name referredBy"
   );
 
   if (!user) {
@@ -41,6 +41,7 @@ export const getDashboardData = async (
 
   return {
     name: user.name,
+    referredBy: user.referredBy,
     convertedUsers: stats.convertedUsers,
     totalCreditsEarned: user.totalCreditsEarned,
     currentBalance: user.credits,

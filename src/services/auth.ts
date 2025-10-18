@@ -1,5 +1,5 @@
 import { type IUser, UserModel } from "../models/userSchema.ts";
-import Referral from "../models/referral.ts";
+import Referral from "../models/referralSchema.ts";
 import { generateReferralCode } from "../utils/generateReferralCode.ts";
 
 /**
