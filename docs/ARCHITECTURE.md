@@ -24,6 +24,7 @@ The Referral & Credit System is built using a modern Node.js backend architectur
 ### 1. Application Layer
 
 #### Express.js Server
+
 - **Purpose**: HTTP server and request routing
 - **Responsibilities**:
   - Request/response handling
@@ -32,6 +33,7 @@ The Referral & Credit System is built using a modern Node.js backend architectur
   - Error handling
 
 #### Middleware Stack
+
 ```
 Request → Security → CORS → Auth → Validation → Controller → Response
 ```
@@ -55,6 +57,7 @@ Request → Security → CORS → Auth → Validation → Controller → Respons
 ### 2. Business Logic Layer
 
 #### Controllers
+
 - **Purpose**: Handle HTTP requests and responses
 - **Responsibilities**:
   - Request parsing
@@ -63,6 +66,7 @@ Request → Security → CORS → Auth → Validation → Controller → Respons
   - Error handling
 
 #### Services
+
 - **Purpose**: Implement core business logic
 - **Responsibilities**:
   - Data processing
@@ -73,6 +77,7 @@ Request → Security → CORS → Auth → Validation → Controller → Respons
 ### 3. Data Access Layer
 
 #### Models (Mongoose ODM)
+
 - **Purpose**: Data structure definition and validation
 - **Responsibilities**:
   - Schema definition
@@ -81,6 +86,7 @@ Request → Security → CORS → Auth → Validation → Controller → Respons
   - Index optimization
 
 #### Database (MongoDB)
+
 - **Purpose**: Data persistence and retrieval
 - **Responsibilities**:
   - Document storage
@@ -132,6 +138,7 @@ Request → Security → CORS → Auth → Validation → Controller → Respons
 ### Data Flow Architecture
 
 #### User Registration Flow
+
 ```
 Frontend → POST /auth/sync → AuthController → AuthService → UserModel → MongoDB
     ↓
@@ -139,6 +146,7 @@ Clerk JWT → Middleware → User Creation → Referral Processing → Response
 ```
 
 #### Purchase Flow
+
 ```
 Frontend → POST /purchase → PurchaseController → PurchaseService
     ↓
@@ -281,6 +289,7 @@ Purchase Creation → Credit Deduction → Referral Credit Award → Transaction
 ### Database Optimization
 
 #### Indexing Strategy
+
 ```javascript
 // User Collection Indexes
 { clerkUserId: 1 }        // Unique, for auth lookups
@@ -299,12 +308,14 @@ Purchase Creation → Credit Deduction → Referral Credit Award → Transaction
 ```
 
 #### Query Optimization
+
 - Use projection to limit returned fields
 - Implement pagination for large datasets
 - Use aggregation pipelines for complex queries
 - Leverage MongoDB's built-in operators
 
 ### Caching Strategy (Future Enhancement)
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Application   │    │   Redis Cache   │    │   MongoDB       │
@@ -387,18 +398,21 @@ Purchase Creation → Credit Deduction → Referral Credit Award → Transaction
 ## Scalability Considerations
 
 ### Horizontal Scaling
+
 - Stateless application design
 - Database connection pooling
 - Load balancer compatibility
 - Session management via JWT
 
 ### Vertical Scaling
+
 - Efficient memory usage
 - Optimized database queries
 - Minimal CPU-intensive operations
 - Proper resource cleanup
 
 ### Future Enhancements
+
 - Microservices architecture
 - Event-driven architecture
 - Message queues for async processing
@@ -408,6 +422,7 @@ Purchase Creation → Credit Deduction → Referral Credit Award → Transaction
 ## Monitoring and Observability
 
 ### Logging Strategy
+
 ```
 ┌─────────────────┐
 │ Application     │
@@ -423,12 +438,14 @@ Purchase Creation → Credit Deduction → Referral Credit Award → Transaction
 ```
 
 ### Health Monitoring
+
 - `/health` endpoint for load balancers
 - Database connection status
 - External service availability
 - Memory and CPU usage
 
 ### Metrics Collection (Future)
+
 - Request rate and latency
 - Error rates by endpoint
 - Business metrics (referrals, purchases)
@@ -437,6 +454,7 @@ Purchase Creation → Credit Deduction → Referral Credit Award → Transaction
 ## Deployment Architecture
 
 ### Development Environment
+
 ```
 ┌─────────────────┐    ┌─────────────────┐
 │   Local Dev     │    │   Local MongoDB │
@@ -446,6 +464,7 @@ Purchase Creation → Credit Deduction → Referral Credit Award → Transaction
 ```
 
 ### Production Environment
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Load          │    │   Application   │    │   MongoDB       │

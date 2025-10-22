@@ -72,6 +72,7 @@ The server will start on `http://localhost:5000`
 ### Authentication
 
 All protected routes require a valid Clerk JWT token in the Authorization header:
+
 ```
 Authorization: Bearer <clerk_jwt_token>
 ```
@@ -81,6 +82,7 @@ Authorization: Bearer <clerk_jwt_token>
 #### User Management
 
 **POST /api/auth/sync**
+
 - Sync user data from Clerk authentication
 - Creates new user or returns existing user
 - Handles referral code processing during signup
@@ -96,6 +98,7 @@ Authorization: Bearer <clerk_jwt_token>
 ```
 
 **GET /api/dashboard**
+
 - Get comprehensive dashboard data for authenticated user
 - Returns referral statistics, credits, and referral link
 
@@ -114,12 +117,14 @@ Authorization: Bearer <clerk_jwt_token>
 #### Products
 
 **GET /api/products**
+
 - Get all available products
 - Returns paginated list of digital products
 
 #### Purchases
 
 **POST /api/purchase**
+
 - Create a new purchase with hybrid payment
 - Automatically handles credit awarding for referrals
 - Supports credits + cash payment
@@ -135,6 +140,7 @@ Authorization: Bearer <clerk_jwt_token>
 ### Health Check
 
 **GET /health**
+
 - Server health status
 - Returns uptime and timestamp
 
@@ -158,21 +164,25 @@ src/
 ### Data Models
 
 #### User Schema
+
 - Stores user information, credits, and referral data
 - Links to Clerk for authentication
 - Tracks referral relationships
 
 #### Referral Schema
+
 - Manages referrer-referred relationships
 - Tracks conversion status and credit awarding
 - Prevents duplicate referrals
 
 #### Purchase Schema
+
 - Records all user purchases
 - Tracks credit usage and cash payments
 - Identifies first purchases for referral credits
 
 #### Product Schema
+
 - Digital product catalog
 - Supports multiple categories (ebook, course, template, etc.)
 
@@ -235,19 +245,22 @@ CMD ["npm", "start"]
 ## 📊 Monitoring
 
 ### Health Checks
+
 - `/health` endpoint for load balancer health checks
 - Uptime and timestamp information
 
 ### Logging
+
 - Request logging middleware
 - Error logging with stack traces
 - Database connection status
 
 ## 🧪 Testing
 
-Run tests (when implemented):
+Run tests:
+
 ```bash
-npm test
+npm run test
 ```
 
 ## 🤝 Contributing
@@ -267,22 +280,26 @@ MIT License - see LICENSE file for details
 ### Common Issues
 
 **Database Connection Failed**
+
 - Verify MongoDB is running
 - Check DATABASE_URL in .env file
 - Ensure network connectivity
 
 **Authentication Errors**
+
 - Verify Clerk keys in .env
 - Check JWT token format
 - Ensure Clerk webhook configuration
 
 **Port Already in Use**
+
 - Change PORT in .env file
 - Kill existing process: `lsof -ti:5000 | xargs kill`
 
 ### Support
 
 For issues and questions:
+
 - Check existing GitHub issues
 - Create new issue with detailed description
 - Include error logs and environment details

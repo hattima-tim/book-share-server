@@ -1,6 +1,7 @@
 # API Documentation
 
 ## Base URL
+
 ```
 http://localhost:5000/api
 ```
@@ -18,9 +19,11 @@ Authorization: Bearer <clerk_jwt_token>
 ### Health Check
 
 #### GET /health
+
 Check server health status.
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -34,12 +37,15 @@ Check server health status.
 ### Authentication
 
 #### POST /api/auth/sync
+
 Sync user data from Clerk authentication. Creates new user or returns existing user data.
 
 **Headers:**
+
 - `Authorization: Bearer <clerk_jwt_token>` (required)
 
 **Response:**
+
 ```json
 {
   "id": "507f1f77bcf86cd799439011",
@@ -51,6 +57,7 @@ Sync user data from Clerk authentication. Creates new user or returns existing u
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized` - Invalid or missing JWT token
 - `500 Internal Server Error` - Failed to generate unique referral code
 
@@ -59,12 +66,15 @@ Sync user data from Clerk authentication. Creates new user or returns existing u
 ### User Dashboard
 
 #### GET /api/dashboard
+
 Get comprehensive dashboard data for the authenticated user.
 
 **Headers:**
+
 - `Authorization: Bearer <clerk_jwt_token>` (required)
 
 **Response:**
+
 ```json
 {
   "name": "John Doe",
@@ -87,6 +97,7 @@ Get comprehensive dashboard data for the authenticated user.
 ```
 
 **Error Responses:**
+
 - `401 Unauthorized` - Invalid or missing JWT token
 - `404 Not Found` - User not found
 - `400 Bad Request` - Invalid user ID format
@@ -96,14 +107,17 @@ Get comprehensive dashboard data for the authenticated user.
 ### Products
 
 #### GET /api/products
+
 Get all available products in the digital marketplace.
 
 **Query Parameters:**
+
 - `page` (optional) - Page number for pagination (default: 1)
 - `limit` (optional) - Items per page (default: 10)
 - `category` (optional) - Filter by category (ebook, course, template, software, other)
 
 **Response:**
+
 ```json
 {
   "products": [
@@ -130,12 +144,15 @@ Get all available products in the digital marketplace.
 ```
 
 #### GET /api/products/:id
+
 Get a specific product by ID.
 
 **Parameters:**
+
 - `id` - Product ID
 
 **Response:**
+
 ```json
 {
   "_id": "507f1f77bcf86cd799439014",
@@ -151,6 +168,7 @@ Get a specific product by ID.
 ```
 
 **Error Responses:**
+
 - `404 Not Found` - Product not found
 - `400 Bad Request` - Invalid product ID format
 
@@ -159,13 +177,16 @@ Get a specific product by ID.
 ### Purchases
 
 #### POST /api/purchase
+
 Create a new purchase with hybrid payment (credits + cash).
 
 **Headers:**
+
 - `Authorization: Bearer <clerk_jwt_token>` (required)
 - `Content-Type: application/json`
 
 **Request Body:**
+
 ```json
 {
   "productId": "507f1f77bcf86cd799439014",
@@ -175,6 +196,7 @@ Create a new purchase with hybrid payment (credits + cash).
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -183,6 +205,7 @@ Create a new purchase with hybrid payment (credits + cash).
 ```
 
 **Business Logic:**
+
 - Automatically calculates credit usage (1 credit = $10)
 - Uses maximum available credits first
 - Remaining amount charged as cash payment
@@ -190,6 +213,7 @@ Create a new purchase with hybrid payment (credits + cash).
 - Updates referral status from "pending" to "converted"
 
 **Error Responses:**
+
 - `401 Unauthorized` - Invalid or missing JWT token
 - `400 Bad Request` - Missing required fields or invalid amount
 - `404 Not Found` - User not found
@@ -224,17 +248,20 @@ All error responses follow this format:
 ## Rate Limiting
 
 API endpoints are rate-limited to prevent abuse:
+
 - 100 requests per minute per IP address
 - 1000 requests per hour per authenticated user
 
 ## Data Validation
 
 ### Purchase Request Validation
+
 - `productId`: Required string, valid MongoDB ObjectId
 - `productName`: Required string, 1-200 characters
 - `amount`: Required number, minimum 0
 
 ### Query Parameter Validation
+
 - `page`: Optional integer, minimum 1
 - `limit`: Optional integer, 1-100
 - `category`: Optional string, must be valid category enum
@@ -242,10 +269,12 @@ API endpoints are rate-limited to prevent abuse:
 ## Webhooks
 
 ### Clerk User Events
+
 The system can handle Clerk webhook events for user lifecycle management:
 
 **Endpoint:** `POST /api/webhooks/clerk`
 **Events:**
+
 - `user.created` - Automatically sync new user
 - `user.updated` - Update user information
 - `user.deleted` - Handle user deletion
@@ -255,6 +284,7 @@ The system can handle Clerk webhook events for user lifecycle management:
 ### Example cURL Commands
 
 **Sync User:**
+
 ```bash
 curl -X POST http://localhost:5000/api/auth/sync \
   -H "Authorization: Bearer <clerk_jwt_token>" \
@@ -262,12 +292,14 @@ curl -X POST http://localhost:5000/api/auth/sync \
 ```
 
 **Get Dashboard:**
+
 ```bash
 curl -X GET http://localhost:5000/api/dashboard \
   -H "Authorization: Bearer <clerk_jwt_token>"
 ```
 
 **Create Purchase:**
+
 ```bash
 curl -X POST http://localhost:5000/api/purchase \
   -H "Authorization: Bearer <clerk_jwt_token>" \
@@ -280,6 +312,7 @@ curl -X POST http://localhost:5000/api/purchase \
 ```
 
 **Get Products:**
+
 ```bash
 curl -X GET "http://localhost:5000/api/products?page=1&limit=5&category=ebook"
 ```

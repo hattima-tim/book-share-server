@@ -19,6 +19,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 **Purpose**: Store user account information, credits, and referral data
 
 **Schema Definition**:
+
 ```javascript
 {
   _id: ObjectId,
@@ -35,12 +36,18 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 ```
 
 **Indexes**:
+
 ```javascript
-{ clerkUserId: 1 }        // Unique index for authentication
-{ referralCode: 1 }       // Unique index for referral lookups
+{
+  clerkUserId: 1;
+} // Unique index for authentication
+{
+  referralCode: 1;
+} // Unique index for referral lookups
 ```
 
 **Validation Rules**:
+
 - `clerkUserId`: Required, unique, string
 - `referralCode`: Required, unique, uppercase, 8 characters
 - `name`: Required, trimmed string
@@ -49,6 +56,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 - `totalReferredUsers`: Non-negative number, default 0
 
 **Sample Document**:
+
 ```json
 {
   "_id": "507f1f77bcf86cd799439011",
@@ -69,6 +77,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 **Purpose**: Track referral relationships and conversion status
 
 **Schema Definition**:
+
 ```javascript
 {
   _id: ObjectId,
@@ -83,6 +92,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 ```
 
 **Indexes**:
+
 ```javascript
 { referrerId: 1 }                           // For dashboard queries
 { referredUserId: 1 }                       // Unique index
@@ -91,6 +101,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 ```
 
 **Validation Rules**:
+
 - `referrerId`: Required ObjectId reference to User
 - `referredUserId`: Required ObjectId reference to User, unique
 - `status`: Required enum ['pending', 'converted']
@@ -98,6 +109,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 - `convertedAt`: Optional date, set when status becomes 'converted'
 
 **Sample Document**:
+
 ```json
 {
   "_id": "507f1f77bcf86cd799439013",
@@ -116,6 +128,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 **Purpose**: Record all purchase transactions and payment details
 
 **Schema Definition**:
+
 ```javascript
 {
   _id: ObjectId,
@@ -135,14 +148,24 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 ```
 
 **Indexes**:
+
 ```javascript
-{ userId: 1 }             // For user purchase history
-{ productId: 1 }          // For product analytics
-{ createdAt: -1 }         // For chronological queries
-{ isFirstPurchase: 1 }    // For referral processing
+{
+  userId: 1;
+} // For user purchase history
+{
+  productId: 1;
+} // For product analytics
+{
+  createdAt: -1;
+} // For chronological queries
+{
+  isFirstPurchase: 1;
+} // For referral processing
 ```
 
 **Validation Rules**:
+
 - `userId`: Required ObjectId reference to User
 - `productId`: Required ObjectId reference to Product
 - `productName`: Required string
@@ -154,6 +177,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 - `referralCreditAwarded`: Boolean, default false
 
 **Sample Document**:
+
 ```json
 {
   "_id": "507f1f77bcf86cd799439015",
@@ -162,7 +186,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
   "productName": "Clean Code",
   "amount": 32.99,
   "creditsUsed": 2,
-  "creditAmount": 20.00,
+  "creditAmount": 20.0,
   "cashAmount": 12.99,
   "paymentMethodId": "pm_1234567890",
   "isFirstPurchase": true,
@@ -177,6 +201,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 **Purpose**: Store digital product catalog information
 
 **Schema Definition**:
+
 ```javascript
 {
   _id: ObjectId,
@@ -192,13 +217,21 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 ```
 
 **Indexes**:
+
 ```javascript
-{ category: 1 }           // For category filtering
-{ price: 1 }              // For price-based queries
-{ title: "text" }         // Text search on title
+{
+  category: 1;
+} // For category filtering
+{
+  price: 1;
+} // For price-based queries
+{
+  title: "text";
+} // Text search on title
 ```
 
 **Validation Rules**:
+
 - `title`: Required string, trimmed
 - `description`: Required string
 - `author`: Required string, trimmed
@@ -207,6 +240,7 @@ The system uses MongoDB as the primary database with Mongoose ODM for schema def
 - `imageUrl`: Optional string
 
 **Sample Document**:
+
 ```json
 {
   "_id": "507f1f77bcf86cd799439016",
@@ -259,14 +293,18 @@ Product (1) ←→ (N) Purchase
 ### Common Queries
 
 #### 1. User Dashboard Data
+
 ```javascript
 // Get user with referral statistics
 const user = await User.findOne({ clerkUserId });
-const referrals = await Referral.find({ referrerId: user._id })
-  .populate('referredUserId', 'name referralCode createdAt');
+const referrals = await Referral.find({ referrerId: user._id }).populate(
+  "referredUserId",
+  "name referralCode createdAt"
+);
 ```
 
 #### 2. Purchase Processing
+
 ```javascript
 // Check if first purchase for referral credits
 const purchaseCount = await Purchase.countDocuments({ userId });
@@ -274,14 +312,15 @@ const isFirstPurchase = purchaseCount === 0;
 ```
 
 #### 3. Referral Conversion
+
 ```javascript
 // Update referral status on first purchase
 await Referral.findOneAndUpdate(
-  { referredUserId: userId, status: 'pending' },
-  { 
-    status: 'converted', 
+  { referredUserId: userId, status: "pending" },
+  {
+    status: "converted",
     creditsAwarded: true,
-    convertedAt: new Date()
+    convertedAt: new Date(),
   }
 );
 ```
@@ -291,48 +330,54 @@ await Referral.findOneAndUpdate(
 #### Aggregation Pipelines
 
 **User Statistics**:
+
 ```javascript
 const stats = await User.aggregate([
   { $match: { _id: userId } },
   {
     $lookup: {
-      from: 'referrals',
-      localField: '_id',
-      foreignField: 'referrerId',
-      as: 'referrals'
-    }
+      from: "referrals",
+      localField: "_id",
+      foreignField: "referrerId",
+      as: "referrals",
+    },
   },
   {
     $addFields: {
-      totalReferrals: { $size: '$referrals' },
+      totalReferrals: { $size: "$referrals" },
       convertedReferrals: {
         $size: {
           $filter: {
-            input: '$referrals',
-            cond: { $eq: ['$$this.status', 'converted'] }
-          }
-        }
-      }
-    }
-  }
+            input: "$referrals",
+            cond: { $eq: ["$$this.status", "converted"] },
+          },
+        },
+      },
+    },
+  },
 ]);
 ```
 
 **Product Analytics**:
+
 ```javascript
 const productStats = await Purchase.aggregate([
-  { $group: {
-    _id: '$productId',
-    totalSales: { $sum: '$amount' },
-    totalPurchases: { $sum: 1 },
-    avgPrice: { $avg: '$amount' }
-  }},
-  { $lookup: {
-    from: 'products',
-    localField: '_id',
-    foreignField: '_id',
-    as: 'product'
-  }}
+  {
+    $group: {
+      _id: "$productId",
+      totalSales: { $sum: "$amount" },
+      totalPurchases: { $sum: 1 },
+      avgPrice: { $avg: "$amount" },
+    },
+  },
+  {
+    $lookup: {
+      from: "products",
+      localField: "_id",
+      foreignField: "_id",
+      as: "product",
+    },
+  },
 ]);
 ```
 
@@ -341,6 +386,7 @@ const productStats = await Purchase.aggregate([
 ### Initial Data Setup
 
 **Product Seeding**:
+
 ```javascript
 const seedProducts = [
   {
@@ -349,8 +395,8 @@ const seedProducts = [
     description: "A handbook of agile software craftsmanship",
     price: 32.99,
     category: "ebook",
-    imageUrl: "https://example.com/clean-code.jpg"
-  }
+    imageUrl: "https://example.com/clean-code.jpg",
+  },
   // ... more products
 ];
 
@@ -360,6 +406,7 @@ await Product.insertMany(seedProducts);
 ### Migration Scripts
 
 **Add New Fields**:
+
 ```javascript
 // Add totalCreditsEarned field to existing users
 await User.updateMany(
