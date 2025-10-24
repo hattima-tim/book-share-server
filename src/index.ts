@@ -18,7 +18,6 @@ app.use(
     credentials: true,
   })
 );
-app.use(clerkMiddleware());
 
 // Parsing middleware
 app.use(express.json({ limit: "10mb" }));
@@ -38,6 +37,8 @@ app.get("/health", (req, res) => {
     uptime: process.uptime(),
   });
 });
+
+app.use(clerkMiddleware());
 
 // API routes
 app.use("/api", apiRouter);
