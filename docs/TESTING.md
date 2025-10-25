@@ -8,22 +8,19 @@ The testing suite provides comprehensive coverage of critical business logic, fo
 
 ```
 src/tests/
-├── setup.ts                    # Test configuration and setup
-├── testUtils.ts                # Testing utilities and helpers
-├── controllers/                # API endpoint tests
+├── setup.ts                           # Test configuration and setup
+├── testUtils.ts                       # Testing utilities and helpers
+├── controllers/                       # API endpoint tests
 │   └── purchaseController.test.ts
-├── services/                   # Business logic tests
-│   ├── purchaseService.test.ts
-│   └── authService.test.ts
-├── models/                     # Data model tests
-│   └── userModel.test.ts
-└── integration/                # End-to-end tests
-    └── purchaseFlow.test.ts
+├── services/                          # Business logic tests
+│   └── purchaseService.node.test.ts
+└── integration/                       # End-to-end tests
+    └── purchaseFlow.node.test.ts
 ```
 
 ## Test Categories
 
-### 1. Critical Payment Tests (`purchaseService.test.ts`)
+### 1. Payment Tests (`purchaseService.node.test.ts`)
 
 **Purpose**: Validate core payment processing and referral credit logic
 
@@ -38,8 +35,8 @@ src/tests/
 **Example**:
 
 ```typescript
-import { it } from 'node:test';
-import assert from 'node:assert';
+import { it } from "node:test";
+import assert from "node:assert";
 
 it("should process hybrid payment (credits + cash) when credits are insufficient", async () => {
   const purchaseAmount = 50; // $50
@@ -63,19 +60,7 @@ it("should process hybrid payment (credits + cash) when credits are insufficient
 });
 ```
 
-### 2. Authentication & User Management Tests (`authService.test.ts`)
-
-**Purpose**: Validate user creation, referral relationships, and data integrity
-
-**Key Test Cases**:
-
-- User sync with and without referral codes
-- Referral code generation and uniqueness
-- Self-referral prevention
-- Concurrent user creation
-- Error handling and retries
-
-### 3. API Endpoint Tests (`purchaseController.test.ts`)
+### 2. API Endpoint Tests (`purchaseController.test.ts`)
 
 **Purpose**: Validate HTTP API behavior and error handling using supertest
 
@@ -90,16 +75,16 @@ it("should process hybrid payment (credits + cash) when credits are insufficient
 **Example**:
 
 ```typescript
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
-import request from 'supertest';
-import express from 'express';
+import { describe, it } from "node:test";
+import assert from "node:assert";
+import request from "supertest";
+import express from "express";
 
 const app = express();
 app.use(express.json());
-app.post('/purchase', purchaseValidation, createPurchase);
+app.post("/purchase", purchaseValidation, createPurchase);
 
-it('should create purchase successfully with valid data', async () => {
+it("should create purchase successfully with valid data", async () => {
   const purchaseData = {
     productId: testProduct._id.toString(),
     productName: testProduct.title,
@@ -107,28 +92,16 @@ it('should create purchase successfully with valid data', async () => {
   };
 
   const response = await request(app)
-    .post('/purchase')
+    .post("/purchase")
     .send(purchaseData)
     .expect(201);
 
   assert.strictEqual(response.body.success, true);
-  assert.strictEqual(response.body.message, 'Purchase created successfully');
+  assert.strictEqual(response.body.message, "Purchase created successfully");
 });
 ```
 
-### 4. Data Model Tests (`userModel.test.ts`)
-
-**Purpose**: Validate database schema, constraints, and performance
-
-**Key Test Cases**:
-
-- Schema validation and constraints
-- Index performance
-- Data integrity during concurrent updates
-- Large batch operations
-- Query optimization
-
-### 5. Integration Tests (`purchaseFlow.test.ts`)
+### 3. Integration Tests (`purchaseFlow.node.test.ts`)
 
 **Purpose**: Validate complete business workflows end-to-end
 
@@ -200,7 +173,7 @@ Tests use Node.js built-in test runner with supertest for HTTP testing:
 Tests use `mongodb-memory-server` for isolated, fast testing:
 
 ```typescript
-import { before, after } from 'node:test';
+import { before, after } from "node:test";
 
 let mongoServer: MongoMemoryServer;
 
@@ -222,7 +195,7 @@ after(async () => {
 Each test starts with a clean database:
 
 ```typescript
-import { beforeEach } from 'node:test';
+import { beforeEach } from "node:test";
 
 beforeEach(async () => {
   const collections = mongoose.connection.collections;
@@ -470,7 +443,7 @@ afterAll(async () => {
 **Async Operations**:
 
 ```typescript
-import assert from 'node:assert';
+import assert from "node:assert";
 
 // Always await async operations
 await assert.rejects(asyncFunction(), /error message/);
@@ -479,7 +452,7 @@ await assert.rejects(asyncFunction(), /error message/);
 **Mock Cleanup**:
 
 ```typescript
-import { afterEach } from 'node:test';
+import { afterEach } from "node:test";
 
 // Restore mocks after tests (manual cleanup for Node.js test runner)
 afterEach(() => {
